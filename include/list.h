@@ -91,7 +91,7 @@ public:
 	~List()
 	{
 		Node* curr;
-		while (first != nullptr)
+		while (first)
 		{
 			curr = first->Next;
 			delete first;
@@ -101,16 +101,22 @@ public:
 	List(const List& other)
 	{
 		Node* curr1 = other.first;
-		Node* curr2 = new Node(curr1->value, nullptr);
-		first = curr2;
-		while (curr1)
+		
+		if (curr1)
 		{
-			Node* next1 = curr1->Next;
-			if (!next1) break;
-			curr2->Next = new Node(next1->value, nullptr);
-			curr2 = curr2->Next;
-			curr1 = curr1->Next;
+			Node* curr2 = new Node(curr1->value, nullptr);
+			first = curr2;
+
+			while (curr1)
+			{
+				Node* next1 = curr1->Next;
+				if (!next1) break;
+				curr2->Next = new Node(next1->value, nullptr);
+				curr2 = curr2->Next;
+				curr1 = curr1->Next;
+			}
 		}
+
 	}
 	void print()
 	{
@@ -121,6 +127,60 @@ public:
 			tmp = tmp->Next;
 		}
 		std::cout << std::endl;
+	}
+	List& operator=(const List& other)
+	{
+		if (this == &other)
+			return *this;
+
+		this->~List();
+
+		Node* curr1 = other.first;
+		if (curr1)
+		{
+			Node* curr2 = new Node(curr1->value, nullptr);
+			first = curr2;
+			while (curr1)
+			{
+				Node* next1 = curr1->Next;
+				if (!next1) break;
+				curr2->Next = new Node(next1->value, nullptr);
+				curr1 = curr1->Next;
+				curr2 = curr2->Next;
+			}
+		}
+		
+		return *this;
+	}
+	bool operator==(const List& other) const noexcept
+	{
+		if (size() != other.size()) return false;
+
+		Node* curr1 = first;
+		Node* curr2 = other.first;
+		while (curr1)
+		{
+			if (curr1->value != curr2->value) return false;
+			if (curr1->Next == nullptr) break;
+			curr1 = curr1->Next;
+			curr2 = curr2->Next;
+		}
+		return true;
+	}
+
+	void clear()
+	{
+		Node* curr;
+		while (first)
+		{
+			curr = first->Next;
+			delete first;
+			first = curr;
+		}
+	}
+	bool operator!=(const List& other) const noexcept
+	{
+		return !(*this == other);
 	}
 	size_t size() const
 	{
@@ -170,9 +230,9 @@ public:
 	}
 	Node* insert_after(int data,Node* prev)
 	{
-		
-		Node* tmp = new Node(data, nullptr);
-		tmp->Next = prev->Next;
+		if (prev == nullptr) throw 0;
+
+		Node* tmp = new Node(data, prev->Next);
 		prev->Next = tmp;
 		return tmp;
 	}
@@ -182,18 +242,15 @@ public:
 	}
 	void erase_after(Node* prev)
 	{
-		if (prev == nullptr) return;
+		if (prev == nullptr || prev->Next == nullptr) throw 0;
 		Node* tmp = prev->Next;
-		if (tmp)
-		{
-			prev->Next = prev->Next->Next;
-			delete tmp;
-		}
+		prev->Next = prev->Next->Next;
+		delete tmp;
 	}
 	void erase_front()
 	{
 		if (first == nullptr)
-			return;
+			throw 0;
 		Node* tmp = first;
 		first = first->Next;
 		delete tmp;
