@@ -133,7 +133,7 @@ public:
 		if (this == &other)
 			return *this;
 
-		this->~List();
+		clear();
 
 		Node* curr1 = other.first;
 		if (curr1)
